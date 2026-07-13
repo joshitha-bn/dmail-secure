@@ -1,0 +1,8 @@
+node_modules/
+data/
+.env
+data-!-*
+data-securemail_*
+data_pop3/
+data_test_temp/
+radata/

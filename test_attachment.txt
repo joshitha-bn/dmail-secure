@@ -1,0 +1,1 @@
+This is a test decentralized attachment file. Uploading it should generate a CID on IPFS.

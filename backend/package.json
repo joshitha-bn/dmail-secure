@@ -1,0 +1,27 @@
+{
+  "name": "securemail-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "SecureMail GunDB Relay Server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "crypto-js": "^4.2.0",
+    "dotenv": "^17.4.2",
+    "express": "^4.18.2",
+    "gun": "^0.2020.1240",
+    "imapflow": "^1.4.6",
+    "mailparser": "^3.9.14",
+    "multer": "^2.1.1",
+    "nodemailer": "^9.0.3",
+    "openpgp": "^6.3.0",
+    "ws": "^8.20.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}

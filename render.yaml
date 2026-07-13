@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: dmail-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "587"
+      - key: SMTP_EMAIL
+        value: etherxinnovdmail@gmail.com
+      - key: SMTP_PASSWORD
+        value: hhnxsxkjpretvpzn
+      - key: IMAP_HOST
+        value: imap.gmail.com
+      - key: IMAP_PORT
+        value: "993"
+      - key: IMAP_USER
+        value: etherxinnovdmail@gmail.com
+      - key: IMAP_PASSWORD
+        value: hhnxsxkjpretvpzn
+      - key: NODE_ENV
+        value: production
+    plan: free
