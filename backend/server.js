@@ -395,12 +395,7 @@ const getLocalIPs = () => {
 try {
   getSMTPTransporter();
 } catch (err) {
-  console.error("❌ [SMTP] Configuration check failed on startup:", err.message);
-  if (process.env.NODE_ENV === "production") {
-    process.exit(1);
-  } else {
-    console.warn("⚠️ [SMTP] Continuing in development mode with simulated fallback.");
-  }
+  console.warn("⚠️ [SMTP] Configuration check failed - SMTP disabled, GunDB relay will still work:", err.message);
 }
 
 server.listen(PORT, "0.0.0.0", async () => {
