@@ -425,11 +425,7 @@ server.listen(PORT, "0.0.0.0", async () => {
     }
   } catch (err) {
     console.error("❌ [SMTP] SMTP verification failed on startup:", err.message);
-    if (process.env.NODE_ENV === "production") {
-      process.exit(1);
-    } else {
-      console.warn("⚠️ [SMTP] Verification failed, continuing in development mode.");
-    }
+    console.warn("⚠️ [SMTP] Continuing without SMTP — GunDB relay will still work.");
   }
 
   // Start the background IMAP synchronization service
