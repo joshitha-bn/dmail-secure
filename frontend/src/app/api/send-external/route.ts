@@ -1,54 +1,33 @@
 import { NextResponse } from "next/server";
-import nodemailer from "nodemailer";
+
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "https://dmail-relay.onrender.com";
 
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { sender, recipient, subject, body: messageBody, attachments, mailId, threadId } = body;
 
-    if (!sender || !recipient || !subject || !messageBody) {
-      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    // Proxy the request to the Render backend which has SMTP configured
+    const backendResponse = await fetch(`${BACKEND_URL}/api/send-external`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+
+    const data = await backendResponse.json().catch(() => ({ error: "Invalid response from backend" }));
+
+    if (!backendResponse.ok) {
+      return NextResponse.json(
+        { error: data.error || `Backend returned status ${backendResponse.status}` },
+        { status: backendResponse.status }
+      );
     }
 
-    // Setup Nodemailer transporter using environment variables
-    const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || "smtp.gmail.com",
-      port: Number(process.env.SMTP_PORT) || 587,
-      secure: false, // true for 465, false for other ports
-      auth: {
-        user: process.env.SMTP_EMAIL || "etherxinnovdmail@gmail.com",
-        pass: process.env.SMTP_PASSWORD || "hhnxsxkjpretvpzn",
-      },
-    });
-
-    // Format attachments for Nodemailer
-    const mailAttachments = attachments ? attachments.map((att: any) => {
-      // If data is a base64 string or data URL
-      let content = att.data;
-      if (typeof content === 'string' && content.startsWith('data:')) {
-        content = content.split(',')[1];
-      }
-      return {
-        filename: att.name,
-        content: content,
-        encoding: 'base64'
-      };
-    }) : [];
-
-    // Send the email
-    const info = await transporter.sendMail({
-      from: `"${sender}" <${process.env.SMTP_EMAIL || "etherxinnovdmail@gmail.com"}>`,
-      replyTo: sender,
-      to: recipient,
-      subject: subject,
-      text: messageBody,
-      html: messageBody.replace(/\n/g, "<br>"), // Simple text to HTML
-      attachments: mailAttachments,
-    });
-
-    return NextResponse.json({ success: true, messageId: info.messageId });
+    return NextResponse.json(data);
   } catch (error: any) {
-    console.error("API /send-external error:", error);
-    return NextResponse.json({ error: error.message || "Failed to send email" }, { status: 500 });
+    console.error("API /send-external proxy error:", error);
+    return NextResponse.json(
+      { error: error.message || "Failed to reach mail backend" },
+      { status: 500 }
+    );
   }
 }
