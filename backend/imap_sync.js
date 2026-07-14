@@ -184,13 +184,8 @@ export async function startIMAPSync(gun) {
 
     } catch (err) {
       console.error("❌ [IMAP Sync] IMAP connection failed:", err.message);
-      if (!initialConnected && process.env.NODE_ENV === "production") {
-        console.error("❌ [IMAP Sync] Critical IMAP connection error on startup. Exiting process.");
-        process.exit(1);
-      } else {
-        console.warn("⚠️ [IMAP Sync] IMAP Sync failed to initialize on startup. Retrying reconnection...");
-        scheduleReconnect();
-      }
+      console.warn("⚠️ [IMAP Sync] IMAP Sync failed to initialize on startup. Retrying reconnection...");
+      scheduleReconnect();
     } finally {
       isConnecting = false;
     }
