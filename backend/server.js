@@ -221,17 +221,25 @@ app.post("/api/send-external", async (req, res) => {
 
     const cleanMailId = mailId || `msg_${Date.now()}`;
     const generatedMsgId = `<${cleanMailId}@dmail.com>`;
-    const resolvedReplyTo = replyTo || process.env.SMTP_EMAIL || process.env.SMTP_USER;
+
+    // ── Critical Fix: Gmail requires From to match authenticated SMTP account.
+    // If we put an arbitrary user address here, Gmail rejects it with SMTP 553.
+    // We use SMTP_FROM (e.g. "EtherX DMail <etherxinnovdmail@gmail.com>") as
+    // the envelope sender, and put the real sender's dmail address in Reply-To
+    // so when recipients reply, it goes back to the dmail user.
+    const smtpFromAddress = process.env.SMTP_FROM || process.env.SMTP_EMAIL || process.env.SMTP_USER;
+    const resolvedReplyTo = replyTo || sender || process.env.SMTP_EMAIL || process.env.SMTP_USER;
 
     console.log(`📧 [SMTP] Composing outbound email:`);
-    console.log(`   - Sender: ${sender}`);
+    console.log(`   - SMTP Auth: ${process.env.SMTP_EMAIL}`);
+    console.log(`   - From: ${smtpFromAddress}`);
+    console.log(`   - Sender (Reply-To): ${resolvedReplyTo}`);
     console.log(`   - Recipient: ${recipient}`);
     console.log(`   - Subject: "${subject}"`);
     console.log(`   - Message-ID: ${generatedMsgId}`);
-    console.log(`   - Reply-To: ${resolvedReplyTo}`);
 
     const mailOptions = {
-      from: process.env.SMTP_FROM || sender,
+      from: smtpFromAddress,
       to: recipient,
       cc: cc || [],
       bcc: bcc || [],
@@ -425,6 +433,22 @@ server.listen(PORT, "0.0.0.0", async () => {
 
   // Start the background IMAP synchronization service
   startIMAPSync(gun);
+
+  // ── Self-Ping Keepalive (prevents Render free-tier sleep) ──
+  // Render free instances sleep after 15 min of inactivity, which kills
+  // IMAP IDLE connections. We ping ourselves every 14 minutes to stay awake.
+  if (process.env.NODE_ENV === "production") {
+    const SELF_URL = process.env.RENDER_EXTERNAL_URL || `http://localhost:${PORT}`;
+    setInterval(async () => {
+      try {
+        await fetch(`${SELF_URL}/health`);
+        console.log("🏓 [Keepalive] Self-ping successful — server staying awake.");
+      } catch (err) {
+        console.warn("⚠️ [Keepalive] Self-ping failed:", err.message);
+      }
+    }, 14 * 60 * 1000); // every 14 minutes
+    console.log("🏓 [Keepalive] Self-ping timer started (every 14 min) to prevent sleep.");
+  }
 })
 
 // ── Graceful Shutdown Handler ──

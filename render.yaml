@@ -6,22 +6,42 @@ services:
     buildCommand: npm install
     startCommand: npm start
     envVars:
+      # ── CORS ──
+      - key: CORS_ORIGIN
+        value: "*"
+
+      # ── SMTP (Gmail App Password) ──
       - key: SMTP_HOST
         value: smtp.gmail.com
       - key: SMTP_PORT
         value: "587"
+      - key: SMTP_SECURE
+        value: "false"
       - key: SMTP_EMAIL
         value: etherxinnovdmail@gmail.com
       - key: SMTP_PASSWORD
         value: hhnxsxkjpretvpzn
+      # SMTP_FROM forces Gmail to accept our authenticated From address
+      - key: SMTP_FROM
+        value: "EtherX DMail <etherxinnovdmail@gmail.com>"
+
+      # ── IMAP (Gmail App Password) ──
       - key: IMAP_HOST
         value: imap.gmail.com
       - key: IMAP_PORT
         value: "993"
+      - key: IMAP_SECURE
+        value: "true"
       - key: IMAP_USER
         value: etherxinnovdmail@gmail.com
       - key: IMAP_PASSWORD
         value: hhnxsxkjpretvpzn
+
+      # ── Pinata (IPFS for attachments) ──
+      # Set this to your Pinata JWT from https://app.pinata.cloud/keys
+      - key: PINATA_JWT
+        value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySW5mb3JtYXRpb24iOnsiaWQiOiJjYzAzNjFkMi01MTI3LTRhMGItOGIwOC0yMWI3NTlkZDZkNzciLCJlbWFpbCI6Impvc2hpdGhhYm4yNDdAZ21haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOnRydWUsInBpbl9wb2xpY3kiOnsicmVnaW9ucyI6W3siZGVzaXJlZFJlcGxpY2F0aW9uQ291bnQiOjEsImlkIjoiRlJBMSJ9LHsiZGVzaXJlZFJlcGxpY2F0aW9uQ291bnQiOjEsImlkIjoiTllDMSJ9XSwidmVyc2lvbiI6MX0sIm1mYV9lbmFibGVkIjpmYWxzZSwic3RhdHVzIjoiQUNUSVZFIn0sImF1dGhlbnRpY2F0aW9uVHlwZSI6InNjb3BlZEtleSIsInNjb3BlZEtleUtleSI6Ijg4YTczZTkwMmQ3MmI2OTZkYzJjIiwic2NvcGVkS2V5U2VjcmV0IjoiNzliMGNjMWI2NmFlMzVmY2I0ODVhOWIxYzhiMGI2OTlmYjgwOTk0YzdmNmQ0MjAxZmY5YjEzMWE1NWY0YTJmNCIsImV4cCI6MTgwODE0OTkyMn0.4icBy6L-QfVx4TLJrnQhXEH3Z3Vqy_WOzuIxkf-Gx1o
+
       - key: NODE_ENV
         value: production
     plan: free
