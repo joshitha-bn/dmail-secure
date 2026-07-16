@@ -301,10 +301,10 @@ export default function SettingsPage() {
   // ── Helpers ──
 
   return (
-    <div style={{ display: "flex", height: "100%", overflow: "hidden" }}>
+    <div id="settings-layout" style={{ display: "flex", height: "100%", overflow: "hidden" }}>
 
       {/* ── Left nav ── */}
-      <div style={{
+      <div id="settings-nav" style={{
         width: "200px", flexShrink: 0, padding: "20px 12px",
         borderRight: "1px solid var(--border-gold)", overflowY: "auto",
       }}>
@@ -328,7 +328,7 @@ export default function SettingsPage() {
       </div>
 
       {/* ── Content ── */}
-      <div style={{ flex: 1, overflowY: "auto", padding: "24px 28px" }}>
+      <div id="settings-content" style={{ flex: 1, overflowY: "auto", padding: "24px 28px" }}>
 
         {/* ══ GENERAL ══════════════════════════════════════════ */}
         {activeSection === "general" && (

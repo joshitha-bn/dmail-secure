@@ -1,0 +1,198 @@
+/* Mobile responsiveness for DMail */
+
+/* Default hidden menu toggle for mobile */
+.mobile-menu-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-bright);
+  font-size: 24px;
+  cursor: pointer;
+  padding: 5px;
+}
+
+@media screen and (max-width: 1024px) {
+  /* Inbox Split View */
+  #inbox-container {
+    flex-direction: column !important;
+  }
+  #inbox-list {
+    width: 100% !important;
+    max-width: 100% !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border-color);
+    flex: 1;
+  }
+  #inbox-view {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 50% !important;
+    flex: 1;
+    padding: 20px !important;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  /* ── Header ─────────────────────────────────────────── */
+  .header {
+    height: 60px !important;
+    padding: 0 12px !important;
+    border-bottom: 1px solid var(--border-gold) !important;
+    background: var(--bg-card) !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 0 !important;
+  }
+
+  /* header-left: just enough for hamburger + logo */
+  .header-left {
+    min-width: auto !important;
+    flex: 0 0 auto !important;
+    gap: 6px !important;
+  }
+
+  /* Show the hamburger — override the inline display:none */
+  .mobile-menu-toggle {
+    display: flex !important;
+  }
+
+  /* Keep logo but scale it down on mobile */
+  .header-logo {
+    display: flex !important;
+    transform: scale(0.65);
+    transform-origin: left center;
+    max-width: 130px;
+    overflow: hidden;
+  }
+
+  /* Center spacer: push right section to far right */
+  .header-middle {
+    flex: 1 !important;
+    display: none !important;
+  }
+
+  /* Header right: auto width, don't flex-grow */
+  .header-right {
+    flex: 0 0 auto !important;
+    min-width: auto !important;
+    gap: 8px !important;
+    padding-left: 8px !important;
+    margin-left: auto !important;
+  }
+
+  /* Hide node status badge */
+  .header-right .node-status-badge {
+    display: none !important;
+  }
+
+  /* Hide bell button on mobile */
+  .header-right .bell-btn {
+    display: none !important;
+  }
+
+  /* Hide theme toggle on mobile — only profile avatar stays on the right */
+  .header-right .theme-toggle {
+    display: none !important;
+  }
+
+  /* Sidebar Drawer — slides in from left */
+  .sidebar {
+    position: fixed !important;
+    top: 60px !important;
+    left: 0 !important;
+    bottom: 0 !important;
+    z-index: 1000 !important;
+    width: 280px !important;
+    background: var(--bg-card) !important;
+    box-shadow: 4px 0 20px rgba(0,0,0,0.5) !important;
+    transform: translateX(-100%) !important;
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+
+  /* Slide IN when open */
+  .sidebar[data-open="true"] {
+    transform: translateX(0) !important;
+  }
+
+  /* Show backdrop overlay on mobile */
+  .sidebar-overlay {
+    display: block !important;
+  }
+
+  /* Mail Area */
+  .dashboard-body {
+    height: calc(100vh - 60px) !important;
+  }
+  .mail-area {
+    width: 100%;
+  }
+
+
+
+  /* Mail List items */
+  .mail-content {
+    flex-direction: column;
+    align-items: flex-start !important;
+    gap: 2px !important;
+  }
+  .mail-snippet {
+    display: none; /* Hide snippet to save space */
+  }
+  .mail-date {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+  }
+  
+  /* Auth cards */
+  .auth-card {
+    padding: 30px 24px !important;
+    border-radius: 16px !important;
+  }
+  .auth-button-row {
+    flex-direction: column !important;
+    gap: 12px !important;
+  }
+  .auth-button-row button {
+    width: 100% !important;
+  }
+
+  /* Settings page */
+  #settings-layout {
+    flex-direction: column !important;
+  }
+  #settings-nav {
+    width: 100% !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border-gold);
+    display: flex !important;
+    align-items: center;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding: 10px !important;
+  }
+  #settings-nav > div:first-child {
+    display: none !important;
+  }
+  #settings-nav button {
+    flex: 0 0 auto;
+    width: auto !important;
+    margin-right: 10px;
+  }
+  #settings-content {
+    padding: 16px 12px !important;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .logo {
+    font-size: 16px !important;
+  }
+  .header-right button {
+    width: 32px !important;
+    height: 32px !important;
+  }
+}

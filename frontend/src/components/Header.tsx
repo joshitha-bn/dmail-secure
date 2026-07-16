@@ -135,9 +135,18 @@ function Header({ onToggle, onCompose }: HeaderProps) {
   }
 
   return (
-    <header className="header" style={{ height: "72px", borderBottom: "1px solid var(--border-gold)", padding: "0 24px" }}>
-      <div className="header-left" style={{ minWidth: "200px" }}>
-        <Logo size={28} />
+    <header className="header" style={{ height: "72px", borderBottom: "1px solid var(--border-gold)", padding: "0 24px", display: "flex", alignItems: "center" }}>
+      <div className="header-left" style={{ display: "flex", alignItems: "center", gap: "8px", minWidth: "200px" }}>
+        <button
+          className="mobile-menu-toggle"
+          onClick={onToggle}
+          style={{ display: "none", background: "none", border: "none", color: "var(--text-bright)", cursor: "pointer", padding: "6px", borderRadius: "8px", alignItems: "center", justifyContent: "center", flexShrink: 0 }}
+        >
+          <Menu size={24} />
+        </button>
+        <div className="header-logo">
+          <Logo size={28} />
+        </div>
       </div>
 
       <div className="header-middle" style={{ flex: 1, display: "flex", justifyContent: "center", position: "relative" }}>
@@ -196,16 +205,16 @@ function Header({ onToggle, onCompose }: HeaderProps) {
       </div>
 
       <div className="header-right" style={{ 
-        flex: 1, 
         display: "flex", 
         justifyContent: "flex-end", 
         alignItems: "center", 
         gap: "24px",
-        paddingLeft: "20px"
+        paddingLeft: "20px",
+        marginLeft: "auto"
       }}>
         
         {/* Node Status Badge */}
-        <div style={{
+        <div className="node-status-badge" style={{
           display: "flex", alignItems: "center", gap: "8px",
           background: "var(--bg-hover)", border: "1px solid var(--border-gold)",
           padding: "6px 14px", borderRadius: "10px",
@@ -256,7 +265,7 @@ function Header({ onToggle, onCompose }: HeaderProps) {
 
         <button 
           suppressHydrationWarning={true}
-          className="header-icon-btn"
+          className="header-icon-btn bell-btn"
           style={{ 
             background: "rgba(255, 255, 255, 0.04)", 
             border: "1px solid rgba(255, 255, 255, 0.02)", 

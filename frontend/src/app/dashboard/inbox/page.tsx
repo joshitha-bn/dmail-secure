@@ -470,7 +470,7 @@ function InboxPageContent() {
     const isEncrypted = mail.message?.includes("-----BEGIN PGP MESSAGE-----")
 
     return (
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "var(--bg-body)", padding: "40px", borderLeft: "1px solid #141414", position: "relative" }}>
+      <div id="inbox-view" className="mail-view-pane" style={{ flex: 1, display: "flex", flexDirection: "column", background: "var(--bg-body)", padding: "40px", borderLeft: "1px solid #141414", position: "relative" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "20px", marginBottom: "32px" }}>
           <button 
             onClick={() => { setSelectedMail(null); setReplyMode(null); }}
@@ -749,8 +749,8 @@ function InboxPageContent() {
   }
 
   return (
-    <div style={{ display: "flex", height: "100%", background: "var(--bg-body)", overflow: "hidden" }}>
-      <div style={{ 
+    <div id="inbox-container" style={{ display: "flex", height: "100%", background: "var(--bg-body)", overflow: "hidden" }}>
+      <div id="inbox-list" style={{ 
         width: currentSelectedMail ? "360px" : "100%", display: "flex", flexDirection: "column", flexShrink: 0,
         transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)", maxWidth: currentSelectedMail ? "360px" : "1200px", margin: currentSelectedMail ? "0" : "0 auto",
         willChange: "width"

@@ -9,6 +9,7 @@ import { initLabelSync } from "@/utils/labelStore"
 import { db } from "@/utils/gun"
 import { LabelProvider } from "@/context/LabelContext"
 import RouteProgressBar from "@/components/RouteProgressBar"
+import MobileNav from "@/components/MobileNav"
 
 // 🚀 Lazy Load heavy components that aren't immediately critical
 const GunStatusBanner = dynamic(() => import("@/components/GunStatusBanner"), { ssr: false })
@@ -18,9 +19,29 @@ const ComposeWindow = dynamic(() => import("@/components/ComposeWindow"), { ssr:
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
   const [showCompose, setShowCompose] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
   const router = useRouter()
   const pathname = usePathname()
   const isInitialized = useRef(false)
+
+  useEffect(() => {
+    const checkMobile = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      if (mobile) setIsSidebarOpen(false);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    // Close sidebar when backdrop is tapped on mobile
+    const handleClose = () => setIsSidebarOpen(false);
+    document.addEventListener('closeSidebar', handleClose);
+
+    return () => {
+      window.removeEventListener('resize', checkMobile);
+      document.removeEventListener('closeSidebar', handleClose);
+    };
+  }, [])
 
   // 1. Initial Data Setup (Run once)
   useEffect(() => {
@@ -199,7 +220,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             key={pathname}
             style={{ 
               animation: "fadeIn 0.3s ease-out",
-              height: "100%", overflow: "hidden"
+              height: "100%", overflow: "hidden",
+              paddingBottom: isMobile ? "64px" : "0" // reserve space for mobile nav
             }}
           >
             <Suspense fallback={null}>
@@ -207,6 +229,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </Suspense>
           </main>
         </div>
+
+        {isMobile && <MobileNav onCompose={() => setShowCompose(true)} />}
 
         <OfflineQueueProcessor />
 

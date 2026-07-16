@@ -77,11 +77,28 @@ function Sidebar({ isOpen, onCompose }: SidebarProps) {
 
   const isActive = (segment: string) => pathname.includes(segment)
 
-  if (!isOpen) return null
-
   return (
     <>
-      <aside className="sidebar">
+      {/* Overlay backdrop on mobile when sidebar open */}
+      {isOpen && (
+        <div
+          className="sidebar-overlay"
+          onClick={() => { document.dispatchEvent(new CustomEvent("closeSidebar")) }}
+          style={{
+            display: "none",
+            position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)",
+            zIndex: 999, backdropFilter: "blur(2px)"
+          }}
+        />
+      )}
+      <aside
+        className="sidebar"
+        data-open={isOpen ? "true" : "false"}
+        style={{
+          transform: "translateX(0)",
+          transition: "transform 0.28s cubic-bezier(0.4, 0, 0.2, 1)",
+        }}
+      >
         <div className="sidebar-top">
 
           {/* Sidebar Branding Removed for a cleaner look */}
