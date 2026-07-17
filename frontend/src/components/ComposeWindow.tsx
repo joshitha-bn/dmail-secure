@@ -234,10 +234,10 @@ export default function ComposeWindow({
   return (
     <div style={{
       position: "fixed", zIndex: 1000,
-      bottom:    isMaximized ? "0"     : "24px",
-      right:     isMaximized ? "0"     : "24px",
-      width:     isMaximized ? "100vw" : "800px",
-      height:    isMaximized ? "100vh" : "600px",
+      bottom:    isMaximized ? "0"     : "16px",
+      right:     isMaximized ? "0"     : "16px",
+      width:     isMaximized ? "100vw" : "min(calc(100vw - 32px), 800px)",
+      height:    isMaximized ? "100vh" : "min(calc(100vh - 32px), 600px)",
       background: "var(--bg-input)",
       borderTop: "4px solid var(--gold-mid)",
       borderRadius: isMaximized ? "0" : "8px",
