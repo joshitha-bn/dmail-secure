@@ -98,7 +98,6 @@ const getPeers = (): string[] => {
       const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://dmail-backedn.onrender.com";
       peers.add(`${backendUrl}/gun`);
     }
-
     // 3. [Discovery] Previously successful relays
     const discovered = localStorage.getItem("dmail_discovered_relay");
     if (discovered) peers.add(discovered);
@@ -139,7 +138,12 @@ export const checkGunServer = async (): Promise<{ reachable: boolean; url: strin
   const count = getGunPeerCount()
   const currentHost = typeof window !== "undefined" ? window.location.hostname : MASTER_IP
   const currentProtocol = typeof window !== "undefined" ? window.location.protocol : "http:"
-  const localUrl = `${currentProtocol}//${currentHost}:8765/gun`
+  let localUrl = "";
+  if (currentHost === "localhost" || currentHost === "127.0.0.1" || currentHost === MASTER_IP) {
+    localUrl = `${currentProtocol}//${currentHost}:8765/gun`
+  } else {
+    localUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "https://dmail-backedn.onrender.com") + "/gun";
+  }
 
   if (count > 0 || gunConnected) {
     return { reachable: true, url: localUrl, peers: count || 1 }

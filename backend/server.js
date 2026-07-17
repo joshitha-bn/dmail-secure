@@ -141,6 +141,15 @@ app.get("/ipfs/:cid", async (req, res) => {
   }
 })
 
+// ── IPFS API Mock for Production ──
+// The frontend checks local IPFS daemon reachability via /api/v0/id.
+// In production, those requests hit the backend. We intercept them here
+// and return a clean 404 (with CORS headers) instead of a messy console error.
+app.all("/api/v0/*", (req, res) => {
+  res.status(404).json({ error: "No local IPFS daemon in production relay" });
+});
+
+
 // ── SMTP Transporter Cache ──
 let smtpTransporter = null;
 
