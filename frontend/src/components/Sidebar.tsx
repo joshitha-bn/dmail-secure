@@ -380,7 +380,7 @@ function Sidebar({ isOpen, onCompose }: SidebarProps) {
               <button className="btn-secondary" onClick={() => setShowLogoutModal(false)} style={{ flex: 1 }}>
                 Cancel
               </button>
-              <button className="btn" onClick={handleLogout} style={{ flex: 1, background: "linear-gradient(135deg, var(--gold-rich), var(--gold-light))" }}>
+              <button className="btn" onClick={handleLogout} style={{ flex: 1 }}>
                 Confirm Sign Out
               </button>
             </div>
