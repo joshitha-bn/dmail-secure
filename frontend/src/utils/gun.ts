@@ -95,7 +95,7 @@ const getPeers = (): string[] => {
       peers.add(`http://127.0.0.1:8765/gun`);
     } else {
       // Production Relay deployment:
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://dmail-relay.onrender.com";
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://dmail-backedn.onrender.com";
       peers.add(`${backendUrl}/gun`);
     }
 

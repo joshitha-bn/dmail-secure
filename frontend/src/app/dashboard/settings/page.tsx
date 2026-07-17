@@ -1035,7 +1035,7 @@ export default function SettingsPage() {
                 "https://gun-manhattan.herokuapp.com/gun",
                 "https://gun-usa.herokuapp.com/gun",
                 "https://gun-eu.herokuapp.com/gun",
-                "https://dmail-relay.onrender.com/gun",
+                "https://dmail-backedn.onrender.com/gun",
               ].map(relay => (
                 <div key={relay} style={{
                   display: "flex", alignItems: "center", gap: "8px",

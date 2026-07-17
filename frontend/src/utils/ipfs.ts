@@ -173,7 +173,7 @@ export const getLocalNode = (port: number) => {
     } else {
       // In production, connect to the configured backend URL
       if (port === 8765) {
-        return process.env.NEXT_PUBLIC_BACKEND_URL || "https://dmail-relay.onrender.com";
+        return process.env.NEXT_PUBLIC_BACKEND_URL || "https://dmail-backedn.onrender.com";
       }
       const protocol = window.location.protocol === "https:" ? "https:" : "http:";
       return `${protocol}//${hostname}:${port}`;

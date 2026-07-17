@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "https://dmail-relay.onrender.com"; // Dynamic fallback to default backend URL
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "https://dmail-backedn.onrender.com"; // Dynamic fallback to default backend URL
 
 export async function POST(req: Request) {
   try {

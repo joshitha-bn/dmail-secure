@@ -28,7 +28,7 @@ export const connectRelay = (email: string, keys: { public: string, private: str
     } else if (process.env.NEXT_PUBLIC_BACKEND_URL) {
       relayUrl = process.env.NEXT_PUBLIC_BACKEND_URL.replace(/^http/, "ws") + "/relay";
     } else {
-      relayUrl = "wss://dmail-relay.onrender.com/relay";
+      relayUrl = "wss://dmail-backedn.onrender.com/relay";
     }
   }
   
