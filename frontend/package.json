@@ -1,5 +1,5 @@
 {
-  "name": "decentralized-mail",
+  "name": "etherx-dmail",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -20,9 +20,11 @@
     "ethers": "^6.16.0",
     "gun": "^0.2020.1241",
     "helia": "^6.0.20",
+    "imapflow": "^1.4.7",
     "kubo-rpc-client": "^6.1.0",
     "libp2p": "^3.1.5",
     "lucide-react": "^0.577.0",
+    "mailparser": "^3.9.14",
     "next": "16.1.6",
     "nodemailer": "^9.0.3",
     "openpgp": "5.11.2",

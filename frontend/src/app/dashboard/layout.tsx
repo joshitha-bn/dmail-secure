@@ -201,6 +201,74 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return () => window.removeEventListener("openCompose", handleOpenCompose)
   }, [])
 
+  // 4. Background IMAP Sync (Serverless fallback)
+  useEffect(() => {
+    const syncIMAP = async () => {
+      try {
+        const user = JSON.parse(localStorage.getItem("user") || "{}")
+        if (!user.email) return
+
+        const res = await fetch("/api/receive-external")
+        if (res.ok) {
+          const data = await res.json()
+          if (data.success && data.emails && data.emails.length > 0) {
+            console.log(`📥 [IMAP Sync] Fetched ${data.emails.length} new external emails!`)
+            
+            for (const email of data.emails) {
+              const mailId = `msg_${Date.now()}_${Math.random().toString(36).slice(2)}`
+              
+              const mailObj = {
+                id: mailId,
+                threadId: email.inReplyTo || email.references?.[0] || `thread_${Date.now()}`,
+                messageId: email.messageId,
+                from: email.from,
+                senderEmail: email.from,
+                to: user.email,
+                receiverEmail: user.email,
+                cc: "[]",
+                bcc: "[]",
+                subject: email.subject,
+                message: email.text,
+                body: email.text,
+                html: email.html,
+                time: email.date,
+                timestamp: new Date(email.date).getTime(),
+                status: "inbox",
+                isRead: false,
+                read: false,
+                isStarred: false,
+                starred: false,
+                hasAttachments: email.attachments?.length > 0,
+                attachmentCount: email.attachments?.length || 0,
+                attachments: JSON.stringify(email.attachments || []),
+                source: "smtp"
+              }
+              
+              // Insert directly into GunDB
+              const { gun } = await import("@/utils/gun")
+              gun.get("securemail_mails").get(mailId).put(mailObj)
+              gun.get(`user_mail_index:${user.email}`).get(mailId).put(mailObj)
+            }
+          }
+        }
+      } catch (err) {
+        console.error("❌ [IMAP Sync] Client polling error:", err)
+      }
+    }
+    
+    // Initial sync after a short delay
+    const initialSyncTimer = setTimeout(syncIMAP, 5000)
+    
+    // Poll every 60 seconds
+    const interval = setInterval(syncIMAP, 60000)
+    
+    return () => {
+      clearTimeout(initialSyncTimer)
+      clearInterval(interval)
+    }
+  }, [])
+
+
   return (
     <LabelProvider>
       <RouteProgressBar />
