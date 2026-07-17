@@ -31,7 +31,7 @@ export async function GET() {
 
     try {
       // Fetch only Unseen messages
-      const messagesGenerator = await client.fetch({ unseen: true }, { envelope: true, source: true, uid: true });
+      const messagesGenerator = await client.fetch({ seen: false }, { envelope: true, source: true, uid: true });
       
       for await (const msg of messagesGenerator) {
         if (!msg.source) continue;
