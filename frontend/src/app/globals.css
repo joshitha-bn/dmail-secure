@@ -400,11 +400,11 @@ body {
   padding: 11px 28px;
   background: linear-gradient(135deg, var(--gold-rich) 0%, var(--gold-light) 50%, var(--gold-rich) 100%);
   background-size: 200% auto;
-  color: #fff;
+  color: #000000; /* Dark text for high contrast on gold */
   border: none;
-  border-radius: 25px;
+  border-radius: 8px; /* Modern square-rounded corners */
   font-weight: 700;
-  font-family: 'Raleway', sans-serif;
+  font-family: 'Inter', sans-serif;
   letter-spacing: 0.5px;
   cursor: pointer;
   transition: background-position 0.4s, box-shadow 0.3s, transform 0.15s;
