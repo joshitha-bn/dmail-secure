@@ -176,7 +176,8 @@ export const startRelayDiscovery = () => {
   if (typeof window === "undefined") return;
 
   const host = window.location.hostname;
-  const isPotentialHost = host === "localhost" || host === "127.0.0.1" || host === MASTER_IP;
+  // Only try to announce local relay on true localhost — never on deployed/Vercel domains
+  const isPotentialHost = host === "localhost" || host === "127.0.0.1";
 
   if (isPotentialHost) {
     const announceRelay = async () => {

@@ -171,12 +171,14 @@ export const getLocalNode = (port: number) => {
     if (hostname === "localhost" || hostname === "127.0.0.1") {
       return `http://127.0.0.1:${port}`;
     } else {
-      // In production, connect to the configured backend URL
-      if (port === 8765) {
-        return process.env.NEXT_PUBLIC_BACKEND_URL || "https://dmail-backedn.onrender.com";
+      // In production, local ports (5001, 8080, 8765) don't exist on Vercel.
+      // All traffic must go through the configured backend relay URL.
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://dmail-backedn.onrender.com";
+      if (port === 8765 || port === 5001 || port === 8080) {
+        return backendUrl;
       }
-      const protocol = window.location.protocol === "https:" ? "https:" : "http:";
-      return `${protocol}//${hostname}:${port}`;
+      // For any other port, fall back to backend URL as well
+      return backendUrl;
     }
   }
   return `http://127.0.0.1:${port}`;
