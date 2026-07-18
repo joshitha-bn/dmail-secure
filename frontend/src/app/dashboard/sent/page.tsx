@@ -132,7 +132,7 @@ function SentPageContent() {
     if (!mail) return null
 
     return (
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "var(--bg-body)", padding: isMobile ? "20px" : "40px", borderLeft: isMobile ? "none" : "1px solid #141414", position: "relative" }}>
+      <div className="mail-view-pane" style={{ flex: 1, display: "flex", flexDirection: "column", background: "var(--bg-body)", padding: isMobile ? "20px" : "40px", borderLeft: isMobile ? "none" : "1px solid #141414", position: "relative" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "20px", marginBottom: isMobile ? "20px" : "32px" }}>
           <button 
             onClick={() => setSelectedMail(null)}
@@ -273,14 +273,14 @@ function SentPageContent() {
   }
 
   return (
-    <div style={{ display: "flex", height: "100%", background: "var(--bg-body)", overflow: "hidden" }}>
-      <div style={{ 
-        width: selectedMail ? (isMobile ? "0px" : "360px") : "100%", 
-        display: selectedMail && isMobile ? "none" : "flex", 
+    <div className="mail-container" data-mail-open={!!selectedMail} style={{ display: "flex", height: "100%", background: "var(--bg-body)", overflow: "hidden" }}>
+      <div className="mail-list-pane" style={{ 
+        width: selectedMail ? "360px" : "100%", 
+        display: "flex", 
         flexDirection: "column", 
         flexShrink: 0,
         transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)", 
-        maxWidth: selectedMail ? (isMobile ? "0px" : "360px") : "1200px", 
+        maxWidth: selectedMail ? "360px" : "1200px", 
         margin: selectedMail ? "0" : "0 auto",
         willChange: "width",
         overflow: "hidden"

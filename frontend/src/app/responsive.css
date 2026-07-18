@@ -196,3 +196,89 @@
     height: 32px !important;
   }
 }
+
+/* ── Split View Mail Pages ── */
+@media screen and (max-width: 768px) {
+  .mail-container[data-mail-open="true"] .mail-list-pane {
+    display: none !important;
+  }
+  .mail-container[data-mail-open="true"] .mail-view-pane {
+    display: flex !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 100% !important;
+    border-left: none !important;
+    padding: 20px !important;
+  }
+  .mail-container[data-mail-open="false"] .mail-view-pane {
+    display: none !important;
+  }
+}
+
+/* ── Compose Window Responsiveness ── */
+@media screen and (max-width: 768px) {
+  .compose-window {
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    border-radius: 0 !important;
+    border-top: none !important;
+  }
+  
+  .compose-header-badge {
+    display: none !important;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .compose-toolbar {
+    flex-direction: column-reverse !important;
+    align-items: stretch !important;
+    gap: 16px !important;
+    padding: 16px 20px !important;
+  }
+  
+  .compose-toolbar-left {
+    justify-content: flex-start !important;
+  }
+  
+  .compose-toolbar-right {
+    width: 100% !important;
+    justify-content: space-between !important;
+    flex-direction: row-reverse !important;
+  }
+  
+  .compose-toolbar-right button {
+    flex: 1 !important;
+    justify-content: center !important;
+  }
+}
+
+/* ── Profile Responsiveness ── */
+.profile-stats-grid {
+  display: grid !important;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)) !important;
+  gap: 12px !important;
+  margin-bottom: 28px !important;
+}
+
+.profile-action-group {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px !important;
+}
+
+@media screen and (max-width: 520px) {
+  .profile-action-group {
+    flex-direction: column !important;
+  }
+  
+  .profile-action-group button {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+}
+

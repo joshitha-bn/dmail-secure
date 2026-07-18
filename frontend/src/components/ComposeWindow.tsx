@@ -232,7 +232,7 @@ export default function ComposeWindow({
   const isMaximized = windowState === "maximized"
 
   return (
-    <div style={{
+    <div className="compose-window" style={{
       position: "fixed", zIndex: 1000,
       bottom:    isMaximized ? "0"     : "16px",
       right:     isMaximized ? "0"     : "16px",
@@ -256,7 +256,7 @@ export default function ComposeWindow({
           New Message
         </span>
         <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
-          <div style={{
+          <div className="compose-header-badge" style={{
             background: "rgba(212, 175, 55, 0.1)", border: "1px solid rgba(212, 175, 55, 0.2)",
             borderRadius: "20px", padding: "4px 12px", display: "flex", alignItems: "center", gap: "8px"
           }}>
@@ -384,8 +384,8 @@ export default function ComposeWindow({
       )}
 
       {/* ── Toolbar ── */}
-      <div style={{ padding: "20px 24px", background: "var(--bg-input)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-        <div style={{ display: "flex", gap: "10px" }}>
+      <div className="compose-toolbar" style={{ padding: "20px 24px", background: "var(--bg-input)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div className="compose-toolbar-left" style={{ display: "flex", gap: "10px" }}>
           <button 
             onClick={() => fileInputRef.current?.click()}
             style={{ 
@@ -434,7 +434,7 @@ export default function ComposeWindow({
           </button>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "16px" }}>
+        <div className="compose-toolbar-right" style={{ display: "flex", alignItems: "center", gap: "16px" }}>
           {status === "error" && (
             <span style={{ color: "#ff4d4d", fontSize: "12px", fontWeight: "600", display: "flex", alignItems: "center", gap: "4px" }}>
               <AlertCircle size={14} /> {statusMsg}

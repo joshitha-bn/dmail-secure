@@ -205,10 +205,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Stats */}
-      <div style={{
-        display: "grid", gridTemplateColumns: "repeat(3, 1fr)",
-        gap: "12px", marginBottom: "28px",
-      }}>
+      <div className="profile-stats-grid">
         {[
           { icon: <Inbox size={22} color="var(--gold-mid)" />, label: "Inbox",   count: counts.inbox   || 0 },
           { icon: <Send size={22} color="var(--gold-mid)" />, label: "Sent",    count: counts.sent    || 0 },
@@ -273,7 +270,7 @@ export default function ProfilePage() {
           </span>
         </p>
 
-        <div style={{ display: "flex", gap: "10px" }}>
+        <div className="profile-action-group">
           <button onClick={copyPublicKey} className="btn-secondary" style={{ display: "flex", alignItems: "center", gap: "6px" }}>
             {copiedPublic ? <><Check size={14} /> Copied!</> : <><Copy size={14} /> Copy Key</>}
           </button>
@@ -315,6 +312,7 @@ export default function ProfilePage() {
           <span style={{
             fontFamily: "Courier New, monospace", fontSize: "11px",
             color: "#e84234", flex: 1, letterSpacing: "2px",
+            overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap"
           }}>
             -----BEGIN PGP PRIVATE KEY----- ··· ████████...
           </span>
@@ -322,7 +320,7 @@ export default function ProfilePage() {
             background: "rgba(217,48,37,0.12)", border: "1px solid rgba(217,48,37,0.25)",
             borderRadius: "6px", padding: "3px 10px", cursor: "pointer",
             color: "#e84234", fontSize: "11px",
-            fontFamily: "Raleway, sans-serif",
+            fontFamily: "Raleway, sans-serif", flexShrink: 0
           }}>View Secret</button>
         </div>
       </div>

@@ -151,7 +151,7 @@ function TrashPageContent() {
     if (!mail) return null
 
     return (
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "var(--bg-body)", padding: "40px", borderLeft: "1px solid #141414", position: "relative" }}>
+      <div className="mail-view-pane" style={{ flex: 1, display: "flex", flexDirection: "column", background: "var(--bg-body)", padding: "40px", borderLeft: "1px solid #141414", position: "relative" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "20px", marginBottom: "32px" }}>
           <button onClick={() => setSelectedMail(null)} style={{ background: "var(--mail-row-border)", border: "1px solid #1F1F1F", borderRadius: "50%", width: "40px", height: "40px", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "var(--text-dim)" }}><ArrowLeft size={18} /></button>
           <h1 style={{ fontSize: "24px", fontWeight: "700", color: "var(--text-bright)", margin: 0, opacity: 0.7 }}>{mail.subject || "(No subject)"}</h1>
@@ -189,8 +189,8 @@ function TrashPageContent() {
   }
 
   return (
-    <div style={{ display: "flex", height: "100%", background: "var(--bg-body)", overflow: "hidden" }}>
-      <div style={{ width: selectedMail ? "360px" : "100%", display: "flex", flexDirection: "column", flexShrink: 0, transition: "width 0.3s ease", maxWidth: selectedMail ? "360px" : "1200px", margin: selectedMail ? "0" : "0 auto" }}>
+    <div className="mail-container" data-mail-open={!!selectedMail} style={{ display: "flex", height: "100%", background: "var(--bg-body)", overflow: "hidden" }}>
+      <div className="mail-list-pane" style={{ width: selectedMail ? "360px" : "100%", display: "flex", flexDirection: "column", flexShrink: 0, transition: "width 0.3s ease", maxWidth: selectedMail ? "360px" : "1200px", margin: selectedMail ? "0" : "0 auto" }}>
         <div style={{ padding: "24px 24px 12px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
             <h2 style={{ fontSize: "24px", fontWeight: "700", color: "var(--text-bright)", margin: 0 }}>Trash</h2>

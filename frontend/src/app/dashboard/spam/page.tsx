@@ -175,7 +175,7 @@ function SpamPageContent() {
     const isSpam = mail.status === "spam"
 
     return (
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", background: "var(--bg-body)", padding: "40px", borderLeft: "1px solid #141414", position: "relative" }}>
+      <div className="mail-view-pane" style={{ flex: 1, display: "flex", flexDirection: "column", background: "var(--bg-body)", padding: "40px", borderLeft: "1px solid #141414", position: "relative" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "20px", marginBottom: "32px" }}>
           <button 
             onClick={() => setSelectedMail(null)}
@@ -265,8 +265,8 @@ function SpamPageContent() {
   }
 
   return (
-    <div style={{ display: "flex", height: "100%", background: "var(--bg-body)", overflow: "hidden" }}>
-      <div style={{ 
+    <div className="mail-container" data-mail-open={!!selectedMail} style={{ display: "flex", height: "100%", background: "var(--bg-body)", overflow: "hidden" }}>
+      <div className="mail-list-pane" style={{ 
         width: selectedMail ? "360px" : "100%", display: "flex", flexDirection: "column", flexShrink: 0,
         transition: "width 0.3s ease", maxWidth: selectedMail ? "360px" : "1200px", margin: selectedMail ? "0" : "0 auto",
         willChange: "width"

@@ -4,6 +4,22 @@ import { simpleParser } from "mailparser";
 
 export const dynamic = "force-dynamic";
 
+// Extract DMail username from a Gmail plus-address like:
+//   etherxinnovdmail+joshitha1234@gmail.com  →  joshitha1234@dmail.com
+// Falls back to null if no plus-tag is present.
+function extractDmailRecipient(toAddresses: any[]): string | null {
+  if (!toAddresses || toAddresses.length === 0) return null;
+  for (const addr of toAddresses) {
+    const address: string = addr.address || "";
+    const plusMatch = address.match(/^[^+]+\+([^@]+)@/);
+    if (plusMatch) {
+      const tag = plusMatch[1]; // e.g. "joshitha1234"
+      return `${tag}@dmail.com`;
+    }
+  }
+  return null;
+}
+
 export async function GET() {
   try {
     const host = process.env.IMAP_HOST || "imap.gmail.com";
@@ -26,18 +42,18 @@ export async function GET() {
 
     await client.connect();
 
-    let lock = await client.getMailboxLock("INBOX");
-    const newEmails = [];
+    const lock = await client.getMailboxLock("INBOX");
+    const newEmails: any[] = [];
 
     try {
-      // Fetch only Unseen messages
+      // Fetch only unread messages
       const messagesGenerator = await client.fetch({ seen: false }, { envelope: true, source: true, uid: true });
-      
+
       for await (const msg of messagesGenerator) {
         if (!msg.source) continue;
 
         const parsed = await simpleParser(msg.source);
-        
+
         const senderObj = parsed.from?.value?.[0] || {};
         const senderAddr = senderObj.address || "unknown@external.com";
         const subject = parsed.subject || "(No Subject)";
@@ -46,19 +62,23 @@ export async function GET() {
         const emailDate = parsed.date || new Date();
         const messageId = parsed.messageId || `<unknown-${msg.uid}@dmail>`;
 
+        // Determine intended DMail recipient via Gmail plus-addressing
+        // e.g. To: etherxinnovdmail+joshitha1234@gmail.com → joshitha1234@dmail.com
+        const toAddresses = parsed.to
+          ? (Array.isArray(parsed.to.value) ? parsed.to.value : [parsed.to.value])
+          : [];
+        const intendedRecipient = extractDmailRecipient(toAddresses);
+
         // Parse attachments
-        const attachmentsList = [];
+        const attachmentsList: any[] = [];
         if (parsed.attachments && parsed.attachments.length > 0) {
           for (const att of parsed.attachments) {
-            // Because we are serverless, we must send attachments back to the client as base64
-            // so the client can upload them to Pinata/IPFS or handle them locally.
-            // Alternatively, we could upload to Pinata directly here if PINATA_JWT is present.
             if (process.env.PINATA_JWT) {
               try {
                 const blob = new Blob([att.content], { type: att.contentType || "application/octet-stream" });
                 const formData = new FormData();
                 formData.append("file", blob, att.filename || `file_${Date.now()}`);
-                
+
                 const response = await fetch("https://api.pinata.cloud/pinning/pinFileToIPFS", {
                   method: "POST",
                   headers: { "Authorization": `Bearer ${process.env.PINATA_JWT}` },
@@ -78,7 +98,6 @@ export async function GET() {
                 console.error("Vercel IMAP Pinata upload error:", e);
               }
             } else {
-              // Send as base64 for the client to handle
               attachmentsList.push({
                 name: att.filename || "Attachment",
                 type: "base64",
@@ -92,6 +111,9 @@ export async function GET() {
         newEmails.push({
           messageId,
           from: senderAddr,
+          // intendedRecipient is the @dmail.com address parsed from Gmail plus-tag.
+          // null means no plus-tag → deliver to whichever user is polling.
+          to: intendedRecipient,
           subject,
           text: bodyText,
           html: bodyHtml,
@@ -101,7 +123,7 @@ export async function GET() {
           attachments: attachmentsList
         });
 
-        // Mark as seen so we don't fetch it again
+        // Mark as read so we don't fetch it again on the next poll
         await client.messageFlagsAdd(msg.uid, ["\\Seen"], { uid: true });
       }
     } finally {

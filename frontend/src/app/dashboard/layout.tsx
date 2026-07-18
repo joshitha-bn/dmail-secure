@@ -213,18 +213,23 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           const data = await res.json()
           if (data.success && data.emails && data.emails.length > 0) {
             console.log(`📥 [IMAP Sync] Fetched ${data.emails.length} new external emails!`)
-            
+
+            const { gun } = await import("@/utils/gun")
+
             for (const email of data.emails) {
               const mailId = `msg_${Date.now()}_${Math.random().toString(36).slice(2)}`
-              
+
+              // Use the plus-address extracted recipient if present, else fall back to logged-in user
+              const deliverTo = email.to || user.email
+
               const mailObj = {
                 id: mailId,
                 threadId: email.inReplyTo || email.references?.[0] || `thread_${Date.now()}`,
                 messageId: email.messageId,
                 from: email.from,
                 senderEmail: email.from,
-                to: user.email,
-                receiverEmail: user.email,
+                to: deliverTo,
+                receiverEmail: deliverTo,
                 cc: "[]",
                 bcc: "[]",
                 subject: email.subject,
@@ -243,11 +248,15 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 attachments: JSON.stringify(email.attachments || []),
                 source: "smtp"
               }
-              
-              // Insert directly into GunDB
-              const { gun } = await import("@/utils/gun")
+
+              // Write to GunDB under the intended recipient's index
               gun.get("securemail_mails").get(mailId).put(mailObj)
-              gun.get(`user_mail_index:${user.email}`).get(mailId).put(mailObj)
+              gun.get(`user_mail_index:${deliverTo}`).get(mailId).put(mailObj)
+
+              // If the intended recipient is the currently logged-in user, also trigger a UI refresh
+              if (deliverTo === user.email) {
+                window.dispatchEvent(new Event("storage"))
+              }
             }
           }
         }
@@ -255,18 +264,19 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         console.error("❌ [IMAP Sync] Client polling error:", err)
       }
     }
-    
+
     // Initial sync after a short delay
     const initialSyncTimer = setTimeout(syncIMAP, 5000)
-    
+
     // Poll every 60 seconds
     const interval = setInterval(syncIMAP, 60000)
-    
+
     return () => {
       clearTimeout(initialSyncTimer)
       clearInterval(interval)
     }
   }, [])
+
 
 
   return (
