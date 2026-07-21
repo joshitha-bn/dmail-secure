@@ -1,4 +1,4 @@
-import { gun, db } from "@/utils/gun"
+import { gun, db, onGunReconnect } from "@/utils/gun"
 import { cacheMail, getCachedMails } from "@/utils/mailCache"
 import { filterIncomingMail } from "@/utils/spamFilter"
 
@@ -32,7 +32,12 @@ const getMailsArray = () => {
 }
 
 export const initMailStore = async (userEmail: string, force = false) => {
-  if (isListening && currentEmail === userEmail && !force) return
+  // Allow re-init if:
+  // - force=true (explicit request), OR
+  // - email changed (account switch), OR
+  // - store is empty AND was already "listening" (meaning first init likely failed — e.g. Render was sleeping)
+  const storeIsEmpty = allMailsMap.size === 0
+  if (isListening && currentEmail === userEmail && !force && !storeIsEmpty) return
   
   // 🧹 [Phase 8 Fix] Always start with a clean slate when the user changes or force=true.
   // This prevents stale data from a previous session polluting the new inbox.
@@ -61,6 +66,14 @@ export const initMailStore = async (userEmail: string, force = false) => {
   } catch (err) {
     console.warn("Failed to load cached mails:", err)
   }
+
+  // 🔄 [Reconnect Fix] If GunDB reconnects after Render wakeup, force a fresh re-sync
+  onGunReconnect(() => {
+    const mailCount = allMailsMap.size
+    console.log(`🔄 [MailStore] GunDB reconnected — re-syncing for ${userEmail} (had ${mailCount} mails)`)
+    // Small delay to let Gun fully establish before querying
+    setTimeout(() => initMailStore(userEmail, true), 1500)
+  })
 
   // 🎯 [Phase 6 Fix] Build inbox from the network index (user_mail_index via listenUserMails).
   // The GunDB listener fires almost immediately on a live connection.

@@ -120,19 +120,68 @@ export const gun = (typeof window !== "undefined")
 // ── Connection status ─────────────────────────────────────────
 let connectedPeers = new Set<string>()
 let gunConnected = false
+let wasEverConnected = false
+let onReconnectCallbacks: Array<() => void> = []
+
+export const onGunReconnect = (cb: () => void) => {
+  onReconnectCallbacks.push(cb)
+  return () => { onReconnectCallbacks = onReconnectCallbacks.filter(f => f !== cb) }
+}
 
 gun.on("hi", (peer: any) => {
+  const wasDisconnected = !gunConnected && wasEverConnected
   gunConnected = true
+  wasEverConnected = true
   if (peer.url) connectedPeers.add(peer.url)
-  // console.log(`📡 [Network] Connected to peer: ${peer.url || "unknown"}`)
+  console.log(`📡 [Network] Connected to peer: ${peer.url || "unknown"}`)
+  // If we're reconnecting after a drop (e.g. Render woke up), notify subscribers
+  if (wasDisconnected) {
+    console.log("🔄 [Network] Reconnected to GunDB relay — triggering mail re-sync")
+    onReconnectCallbacks.forEach(cb => { try { cb() } catch (e) { console.warn("[Reconnect] callback error", e) } })
+  }
 })
 
 gun.on("bye", (peer: any) => {
   if (peer.url) connectedPeers.delete(peer.url)
+  if (connectedPeers.size === 0) gunConnected = false
 })
 
 export const getGunPeerCount = () => connectedPeers.size || (gunConnected ? 1 : 0)
 export const isGunConnected = () => gunConnected || connectedPeers.size > 0
+
+/**
+ * 🛰️ KEEP-ALIVE — Prevents Render free tier from sleeping (spins down after 15 min idle).
+ * Pings the backend /health endpoint every 10 minutes.
+ * If the backend was sleeping and just woke up, re-adds it as a Gun peer to force reconnect.
+ */
+export const startKeepAlive = () => {
+  if (typeof window === "undefined") return
+  const hostname = window.location.hostname
+  if (hostname === "localhost" || hostname === "127.0.0.1") return // Not needed in dev
+
+  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://dmail-backend.onrender.com"
+  const gunUrl = `${backendUrl}/gun`
+
+  const ping = async () => {
+    try {
+      const res = await fetch(`${backendUrl}/health`, { signal: AbortSignal.timeout(10000) })
+      if (res.ok) {
+        // If Gun isn't connected, force-add the peer back
+        if (!gunConnected || !connectedPeers.has(gunUrl)) {
+          console.log("🔄 [KeepAlive] Backend alive but Gun disconnected — re-adding peer")
+          ;(gun as any).opt({ peers: [gunUrl] })
+        }
+      }
+    } catch {
+      console.warn("⏸️ [KeepAlive] Backend unreachable — Render may be sleeping, will retry")
+    }
+  }
+
+  // First ping after 5 seconds (gives time for initial connect attempt)
+  setTimeout(ping, 5000)
+  // Then every 9 minutes (Render sleeps after 15 min, so 9 min keeps it awake)
+  setInterval(ping, 9 * 60 * 1000)
+}
 
 export const checkGunServer = async (): Promise<{ reachable: boolean; url: string; peers?: number; error?: string }> => {
   const count = getGunPeerCount()
@@ -1443,6 +1492,8 @@ export const db = {
   // ✅ Listen for mails specifically belonging to this user (Cross-device sync optimized)
   listenUserMails: (userEmail: string, cb: (mail: any) => void) => {
     const cleanEmail = userEmail.trim().toLowerCase()
+    // 🛡️ Dedup set: tracks mail IDs for which we already created an inner .on() listener
+    const fetchedMailIds = new Set<string>()
 
     // Compute variants (@dmail.com <-> @securemail.com)
     const variants = [cleanEmail]
@@ -1469,6 +1520,10 @@ export const db = {
           cb({ ...indexEntry, id: mailId, fromCache: false })
           return
         }
+
+        // 🛡️ [Dedup Fix] Only create ONE inner .on() listener per mail ID to prevent listener leaks
+        if (fetchedMailIds.has(mailId)) return
+        fetchedMailIds.add(mailId)
 
         // 🛡️ [Cross-Device Discovery Fix]
         // If the index entry exists but body is missing, explicitly fetch from backbone
@@ -1506,6 +1561,8 @@ export const db = {
   // ✅ Listen for sent mails (sent folder) via canonical user_mail_index
   listenSentMails: (senderEmail: string, cb: (mail: any) => void) => {
     const cleanEmail = senderEmail.trim().toLowerCase()
+    // 🛡️ Dedup set: tracks mail IDs for which we already created an inner .on() listener
+    const sentFetchedIds = new Set<string>()
     const variants = [cleanEmail]
     if (cleanEmail.endsWith("@dmail.com")) variants.push(cleanEmail.replace("@dmail.com", "@securemail.com"))
     else if (cleanEmail.endsWith("@securemail.com")) variants.push(cleanEmail.replace("@securemail.com", "@dmail.com"))
@@ -1524,6 +1581,10 @@ export const db = {
           cb({ ...indexEntry, id: mailId })
           return
         }
+
+        // 🛡️ [Dedup Fix] Only create ONE inner .on() listener per mail ID
+        if (sentFetchedIds.has(mailId)) return
+        sentFetchedIds.add(mailId)
 
         gun.get("securemail_mails").get(mailId).on((fullMail: any) => {
           const merged = fullMail?.message

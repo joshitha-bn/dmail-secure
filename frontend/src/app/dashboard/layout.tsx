@@ -6,7 +6,7 @@ import Header from "@/components/Header"
 import Sidebar from "@/components/Sidebar"
 import { initMailStore, updateMailInStore, getAllRaw } from "@/utils/mailStore"
 import { initLabelSync } from "@/utils/labelStore"
-import { db } from "@/utils/gun"
+import { db, startKeepAlive } from "@/utils/gun"
 import { LabelProvider } from "@/context/LabelContext"
 import RouteProgressBar from "@/components/RouteProgressBar"
 import MobileNav from "@/components/MobileNav"
@@ -67,6 +67,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     
     initMailStore(user.email)
     initLabelSync(user.email)
+    startKeepAlive() // 🛰️ Keep Render backend alive (prevents 15-min sleep on free tier)
     
     // ⚡ [Fast Path] Initialize Real-Time Relay
     if (user.email && user.fastPublicKey && user.fastPrivateKey) {
