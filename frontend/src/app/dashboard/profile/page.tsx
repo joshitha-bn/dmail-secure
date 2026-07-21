@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { getCounts, subscribe } from "@/utils/mailStore"
+import { getCounts, subscribe, clearStore } from "@/utils/mailStore"
 import { copyToClipboard } from "@/utils/clipboard"
 import { db } from "@/utils/gun"
+import { getSavedAccounts, getAvatarColor, switchAccount, removeAccount } from "@/utils/accounts"
 import { 
   User, Inbox, Send, Star, AlertOctagon, Trash2, 
   Key, Copy, Check, Download, Lock, Shield, X, 
-  RefreshCw, CheckCircle2, XCircle 
+  RefreshCw, CheckCircle2, XCircle, Users, UserPlus 
 } from "lucide-react"
 
 export default function ProfilePage() {
@@ -20,6 +21,8 @@ export default function ProfilePage() {
   
   const [copiedPrivate, setCopiedPrivate] = useState(false)
   const [showFullPrivateKey, setShowFullPrivateKey] = useState(false)
+  
+  const [savedAccounts, setSavedAccounts] = useState<any[]>([])
 
   const [syncing, setSyncing] = useState(false)
   const [syncStatus, setSyncStatus] = useState<"idle" | "success" | "error">("idle")
@@ -66,6 +69,9 @@ export default function ProfilePage() {
     if (!localUser.email) return
     setUser(localUser)
 
+    // Load saved accounts list
+    setSavedAccounts(getSavedAccounts())
+
     const updateStats = () => {
       setCounts(getCounts(localUser.email))
     }
@@ -74,6 +80,33 @@ export default function ProfilePage() {
     const unsub = subscribe(updateStats)
     return () => unsub()
   }, [])
+
+  const handleSwitch = (account: any) => {
+    clearStore()
+    switchAccount(account)
+    window.location.href = "/dashboard/inbox"
+  }
+
+  const handleRemove = (email: string) => {
+    if (confirm(`Are you sure you want to sign out of and remove ${email}?`)) {
+      removeAccount(email)
+      const remaining = savedAccounts.filter(a => a.email.toLowerCase() !== email.toLowerCase())
+      setSavedAccounts(remaining)
+      
+      // If we removed the active user
+      if (email.toLowerCase() === user.email.toLowerCase()) {
+        clearStore()
+        if (remaining.length > 0) {
+          switchAccount(remaining[0])
+          window.location.href = "/dashboard/inbox"
+        } else {
+          localStorage.removeItem("user")
+          localStorage.removeItem("securemail_accounts")
+          window.location.href = "/login"
+        }
+      }
+    }
+  }
 
   const copyPublicKey = () => {
     if (!user?.publicKey) return
@@ -338,6 +371,107 @@ export default function ProfilePage() {
           Messages are encrypted with RSA-2048 PGP. Only you can decrypt them
           using your private key and password. Your private key never leaves your device.
         </p>
+      </div>
+
+      {/* Logged In Accounts / Switch Profile */}
+      <div style={{
+        background: "var(--bg-card)", border: "1px solid var(--border-gold)",
+        borderRadius: "12px", padding: "20px", marginBottom: "16px", marginTop: "16px"
+      }}>
+        <p style={{
+          color: "var(--text-muted)", fontSize: "11px", marginBottom: "6px",
+          textTransform: "uppercase", letterSpacing: "1px",
+          display: "flex", alignItems: "center", gap: "6px"
+        }}>
+          <Users size={14} /> Saved Identities / Logged In Accounts
+        </p>
+        <p style={{ color: "var(--text-dim)", fontSize: "12px", marginBottom: "16px" }}>
+          Manage your logged in accounts on this device. Switch profiles or add a new identity.
+        </p>
+
+        <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "16px" }}>
+          {savedAccounts.map((acc) => {
+            const isActive = acc.email.toLowerCase() === user.email.toLowerCase()
+            return (
+              <div 
+                key={acc.email}
+                style={{
+                  background: isActive ? "rgba(212, 175, 55, 0.05)" : "var(--bg-panel)",
+                  border: isActive ? "1px solid var(--gold-mid)" : "1px solid var(--border-color)",
+                  borderRadius: "10px", padding: "12px 16px",
+                  display: "flex", alignItems: "center", gap: "14px",
+                  transition: "all 0.2s ease"
+                }}
+              >
+                {/* Avatar */}
+                <div style={{
+                  width: "40px", height: "40px", borderRadius: "50%",
+                  background: getAvatarColor(acc.email),
+                  display: "flex", alignItems: "center", justifyContent: "center",
+                  fontSize: "16px", fontWeight: "700", color: "var(--bg-body)",
+                  flexShrink: 0
+                }}>
+                  {(acc.name || acc.email).charAt(0).toUpperCase()}
+                </div>
+                
+                {/* Details */}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: "14px", fontWeight: "600", color: "var(--text-bright)", display: "flex", alignItems: "center", gap: "8px" }}>
+                    <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {acc.name || "Saved Account"}
+                    </span>
+                    {isActive && (
+                      <span style={{ fontSize: "10px", color: "var(--gold-mid)", background: "rgba(212, 175, 55, 0.15)", padding: "2px 8px", borderRadius: "10px", fontWeight: "bold", flexShrink: 0 }}>
+                        Active
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ fontSize: "12px", color: "var(--text-muted)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                    {acc.email}
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div style={{ display: "flex", gap: "8px", flexShrink: 0 }}>
+                  {!isActive ? (
+                    <>
+                      <button 
+                        onClick={() => handleSwitch(acc)}
+                        className="btn-secondary" 
+                        style={{ fontSize: "12px", padding: "6px 12px", borderRadius: "8px", border: "1px solid var(--border-gold)", color: "var(--text-bright)", cursor: "pointer" }}
+                      >
+                        Switch
+                      </button>
+                      <button 
+                        onClick={() => handleRemove(acc.email)}
+                        className="btn-secondary" 
+                        style={{ fontSize: "12px", padding: "6px 12px", borderRadius: "8px", color: "#e84234", border: "1px solid rgba(217,48,37,0.3)", cursor: "pointer" }}
+                      >
+                        Remove
+                      </button>
+                    </>
+                  ) : (
+                    <button 
+                      onClick={() => handleRemove(acc.email)}
+                      className="btn-secondary" 
+                      style={{ fontSize: "12px", padding: "6px 12px", borderRadius: "8px", color: "#e84234", border: "1px solid rgba(217,48,37,0.3)", cursor: "pointer" }}
+                    >
+                      Sign Out
+                    </button>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
+        <button 
+          onClick={() => router.push("/login?add=true")}
+          className="btn-secondary" 
+          style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", padding: "10px", border: "1px solid var(--border-gold)", borderRadius: "8px", color: "var(--gold-mid)", cursor: "pointer", fontFamily: "Raleway, sans-serif", fontWeight: "700" }}
+        >
+          <UserPlus size={16} /> Add another account
+        </button>
       </div>
 
       {/* Full Public Key Modal */}

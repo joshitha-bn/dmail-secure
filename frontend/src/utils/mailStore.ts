@@ -1,5 +1,5 @@
 import { gun, db } from "@/utils/gun"
-import { cacheMail } from "@/utils/mailCache"
+import { cacheMail, getCachedMails } from "@/utils/mailCache"
 import { filterIncomingMail } from "@/utils/spamFilter"
 
 // 🚀 HIGH-PERFORMANCE DATA STRUCTURES
@@ -44,10 +44,25 @@ export const initMailStore = async (userEmail: string, force = false) => {
   currentEmail = userEmail
   isListening = true
 
-  console.log(`📥 [MailStore] Fresh init for ${userEmail} (force: ${force}) — loading from GunDB index only`)
+  console.log(`📥 [MailStore] Fresh init for ${userEmail} (force: ${force}) — preloading cache & loading from GunDB index`)
 
-  // 🎯 [Phase 6 Fix] Build inbox ONLY from the network index (user_mail_index via listenUserMails).
-  // Do NOT pre-load from IndexedDB cache — cache may be stale and will cause inconsistency.
+  // Pre-load from IndexedDB cache to ensure instant offline load and avoid empty screen
+  try {
+    const cachedMails = await getCachedMails(userEmail)
+    if (cachedMails && cachedMails.length > 0) {
+      console.log(`📥 [MailStore] Preloaded ${cachedMails.length} mails from local cache for ${userEmail}`)
+      cachedMails.forEach(mail => {
+        if (mail && mail.id) {
+          allMailsMap.set(mail.id, { ...mail, fromCache: true })
+        }
+      })
+      notify()
+    }
+  } catch (err) {
+    console.warn("Failed to load cached mails:", err)
+  }
+
+  // 🎯 [Phase 6 Fix] Build inbox from the network index (user_mail_index via listenUserMails).
   // The GunDB listener fires almost immediately on a live connection.
   db.listenUserMails(userEmail, async (mail: any) => {
     if (!mail || !mail.id) return

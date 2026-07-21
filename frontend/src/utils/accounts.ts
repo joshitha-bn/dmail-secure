@@ -25,9 +25,14 @@ export const getSavedAccounts = (): SavedAccount[] => {
 }
 
 export const saveAccount = (user: SavedAccount): void => {
-  // 🛡️ [Security Layer] Only allow one account to be saved on this device.
-  // Overwrites any previous accounts to ensure a clean, single-identity state.
-  localStorage.setItem(ACCOUNTS_KEY, JSON.stringify([user]))
+  const accounts = getSavedAccounts()
+  const existingIndex = accounts.findIndex((a) => a.email.toLowerCase() === user.email.toLowerCase())
+  if (existingIndex > -1) {
+    accounts[existingIndex] = { ...accounts[existingIndex], ...user }
+  } else {
+    accounts.push(user)
+  }
+  localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts))
 }
 
 export const removeAccount = (email: string): void => {

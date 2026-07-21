@@ -1472,7 +1472,7 @@ export const db = {
 
         // 🛡️ [Cross-Device Discovery Fix]
         // If the index entry exists but body is missing, explicitly fetch from backbone
-        gun.get("securemail_mails").get(mailId).once(async (fullMail: any) => {
+        gun.get("securemail_mails").get(mailId).on(async (fullMail: any) => {
           const merged = { ...indexEntry, ...fullMail, id: mailId }
           if (merged.message) {
             await cacheMail(merged)
@@ -1525,7 +1525,7 @@ export const db = {
           return
         }
 
-        gun.get("securemail_mails").get(mailId).once((fullMail: any) => {
+        gun.get("securemail_mails").get(mailId).on((fullMail: any) => {
           const merged = fullMail?.message
             ? { ...indexEntry, ...fullMail, id: mailId }
             : { ...indexEntry, id: mailId }

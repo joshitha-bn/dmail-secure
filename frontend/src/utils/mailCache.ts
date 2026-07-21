@@ -39,14 +39,26 @@ export const cacheMail = async (mail: any): Promise<void> => {
 }
 
 // Get all cached mails for a user
-export const getCachedMails = async (receiverEmail: string): Promise<any[]> => {
+export const getCachedMails = async (userEmail: string): Promise<any[]> => {
   try {
     const db = await openDB()
     const tx = db.transaction(STORE_NAME, "readonly")
-    const index = tx.objectStore(STORE_NAME).index("receiverEmail")
-    const request = index.getAll(receiverEmail)
+    const store = tx.objectStore(STORE_NAME)
+    const request = store.getAll()
     return new Promise((resolve, reject) => {
-      request.onsuccess = () => resolve(request.result || [])
+      request.onsuccess = () => {
+        const all = request.result || []
+        const cleanEmail = userEmail.toLowerCase()
+        const variants = [cleanEmail]
+        if (cleanEmail.endsWith("@dmail.com")) variants.push(cleanEmail.replace("@dmail.com", "@securemail.com"))
+        else if (cleanEmail.endsWith("@securemail.com")) variants.push(cleanEmail.replace("@securemail.com", "@dmail.com"))
+        
+        const filtered = all.filter((m: any) => 
+          (m.receiverEmail && variants.includes(m.receiverEmail.toLowerCase())) ||
+          (m.senderEmail && variants.includes(m.senderEmail.toLowerCase()))
+        )
+        resolve(filtered)
+      }
       request.onerror = () => reject(request.error)
     })
   } catch {
