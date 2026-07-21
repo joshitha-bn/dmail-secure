@@ -43,7 +43,7 @@ const getLocalRelay = () => {
       const protocol = window.location.protocol === "https:" ? "https:" : "http:";
       return `${protocol}//${window.location.hostname}:8765/gun`;
     }
-    return (process.env.NEXT_PUBLIC_BACKEND_URL || "https://dmail-backedn.onrender.com") + "/gun";
+    return (process.env.NEXT_PUBLIC_BACKEND_URL || "https://dmail-backend.onrender.com") + "/gun";
   }
   return "http://localhost:8765/gun";
 };

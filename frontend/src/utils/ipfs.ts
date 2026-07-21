@@ -173,7 +173,7 @@ export const getLocalNode = (port: number) => {
     } else {
       // In production, local ports (5001, 8080, 8765) don't exist on Vercel.
       // All traffic must go through the configured backend relay URL.
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://dmail-backedn.onrender.com";
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://dmail-backend.onrender.com";
       if (port === 8765 || port === 5001 || port === 8080) {
         return backendUrl;
       }

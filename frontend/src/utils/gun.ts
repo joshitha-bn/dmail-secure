@@ -95,7 +95,7 @@ const getPeers = (): string[] => {
       peers.add(`http://127.0.0.1:8765/gun`);
     } else {
       // Production Relay deployment:
-      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://dmail-backedn.onrender.com";
+      const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "https://dmail-backend.onrender.com";
       peers.add(`${backendUrl}/gun`);
     }
     // 3. [Discovery] Previously successful relays
@@ -142,7 +142,7 @@ export const checkGunServer = async (): Promise<{ reachable: boolean; url: strin
   if (currentHost === "localhost" || currentHost === "127.0.0.1" || currentHost === MASTER_IP) {
     localUrl = `${currentProtocol}//${currentHost}:8765/gun`
   } else {
-    localUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "https://dmail-backedn.onrender.com") + "/gun";
+    localUrl = (process.env.NEXT_PUBLIC_BACKEND_URL || "https://dmail-backend.onrender.com") + "/gun";
   }
 
   if (count > 0 || gunConnected) {
